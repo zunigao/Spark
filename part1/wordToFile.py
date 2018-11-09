@@ -18,7 +18,7 @@ data = data.select(psf.split("filename","/"), "wordlist") \
 
 
 data = data.select("wordlist",\
-				words1a.filenamesplit[ \
+				data.filenamesplit[ \
             	psf.size(words1a.filenamesplit)-1])\
            .toDF( "wordlist", "realfilename")
 
