@@ -11,11 +11,10 @@ lines = spark.read.text("*.txt")
 
 words1 = lines.select(psf.input_file_name(), \
                       psf.split("value","\s")) \
-              .toDF("filename", "wordlist")
+              		.toDF("filename", "wordlist")
 
-words1a = words1.select(\
-        psf.split("filename","/"), "wordlist") \
-           .toDF("filenamesplit", "wordlist")
+words1a = words1.select(psf.split("filename","/"), "wordlist") \
+			.toDF("filenamesplit", "wordlist")
 
 
 words1b = words1a.select("wordlist",\
@@ -25,18 +24,33 @@ words1b = words1a.select("wordlist",\
 
 words2 = words1b.select(psf.explode("wordlist"), "realfilename") \
               .toDF("word", "realfilename")
-#words2.show()
+
+
+
+
+words2 = words2.dropDuplicates()
+
 #.agg(psf.count("word")) \
 
-results = words2.groupBy("word","realfilename") \
-                .agg(psf.collect_list("realfilename")) \
-                .toDF("word","realfilename", "the count")
+results = words2.groupBy("word") \
+                .agg(psf.collect_set("realfilename")) \
+                .toDF("word", "the count")
                 
-results2 = results.select("word", "the count").toDF("word", "filename")
+df = results.select("word", "the count").toDF("word", "filename")
 
+from pyspark.sql.functions import udf
+from pyspark.sql.types import StringType
 
+def array_to_string(my_list):
+    return '[' + ','.join([str(elem) for elem in my_list]) + ']'
 
-results2.show()
+array_to_string_udf = udf(array_to_string,StringType())
 
-#words1.repartition(1).write.save("part1out", format="txt")
+df = df.withColumn('filenames',array_to_string_udf(df["filename"]))
+
+df = df.drop("filename")
+
+df.show()
+
+df.repartition(1).write.save("part1out", format="csv")
 
