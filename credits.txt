@@ -1,2 +1,5 @@
 Orlando Zuniga and Blake Johnson
 https://spark.apache.org/docs/latest/
+
+Used this to convert our dataframe into an acceptable csv format because we kept getting errors that repartition would not work with the array of strings.
+https://stackoverflow.com/questions/40426106/spark-2-0-x-dump-a-csv-file-from-a-dataframe-containing-one-array-of-type-string
