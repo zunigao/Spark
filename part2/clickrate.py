@@ -3,15 +3,25 @@ from pyspark.sql import SparkSession
 
 spark = SparkSession.builder.appName("wordcount").getOrCreate()
 
-mydata = spark.read.json("/Accounts/dmusicant/currentwork/cs348f18share/spark/jsonstuff.log")
+clicks = spark.read.json("clicks.log")
+impressions = spark.read.json("impressions.log")
 
-yourdata = mydata.select("impressionId", "modelId")
 
-ourdata = mydata.select("impressionId", "browserCookie")
+clicks = clicks.select("adId")
+impressions = impressions.select("referrer","adId")
 
-yourdata.show()
-ourdata.show()
+#yourdata.show()
+#ourdata.show()
 
+combinedData = impressions.join(clicks, impressions.adId == clicks.adId)
+
+#combinedData = combinedData.select("referrer", "adId")
+
+
+combinedData.show()
+
+
+"""
 joineddata = yourdata.join(ourdata,
        yourdata.impressionId == ourdata.impressionId)
 
@@ -21,3 +31,4 @@ results = joineddata.groupby(yourdata.impressionId) \
            .agg(psf.collect_list("modelId"))
 results.show()
 
+"""
